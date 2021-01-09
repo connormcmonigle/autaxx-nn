@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 3.12)
 # Project
 project(Autaxx VERSION 1.0 LANGUAGES CXX)
 
-# Find packages
-find_package(Catch2 CONFIG REQUIRED)
-
 # Base directory relative includes
 include_directories(.)
 
@@ -41,7 +38,6 @@ add_executable(
     src/protocol/uai/extension/split.cpp
     src/search/search.cpp
     src/search/tryhard/search.cpp
-    src/search/tryhard/eval.cpp
     src/search/tryhard/root.cpp
     src/search/mcts/eval.cpp
     src/search/mcts/root.cpp
@@ -54,32 +50,4 @@ add_executable(
     src/search/alphabeta/root.cpp
 )
 
-# Add the test executable
-add_executable(
-    autaxx-test
-    tests/main.cpp
-    tests/uai-moves.cpp
-    tests/uai-pos.cpp
-    tests/uai-setoption.cpp
-    tests/options-check.cpp
-    tests/options-combo.cpp
-    tests/options-spin.cpp
-    tests/options-string.cpp
-    tests/hashtable.cpp
-    tests/alphabeta_sorter.cpp
-    #tests/search-minimax.cpp
-    src/options.cpp
-    src/protocol/uai/moves.cpp
-    src/protocol/uai/position.cpp
-    src/protocol/uai/setoption.cpp
-    #src/search/alphabeta/alphabeta.cpp
-    #src/search/alphabeta/root.cpp
-    #src/search/minimax/minimax.cpp
-    #src/search/minimax/root.cpp
-    #src/search/random/root.cpp
-)
-
-set_property(TARGET autaxx-test PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE FALSE)
-
 target_link_libraries(autaxx "${CMAKE_CURRENT_LIST_DIR}/libs/libataxx/build/static/libataxx.a")
-target_link_libraries(autaxx-test Catch2::Catch2 "${CMAKE_CURRENT_LIST_DIR}/libs/libataxx/build/static/libataxx.a")

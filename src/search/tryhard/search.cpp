@@ -54,7 +54,7 @@ int Tryhard::search(Stack *stack, const libataxx::Position &pos, int alpha, int 
 
     // Make sure we stop searching
     if (depth <= 0 || stack->ply >= max_depth) {
-        return eval(pos);
+        return eval(pos, weights_);
     }
 
     const bool root = stack->ply == 0;
@@ -97,7 +97,7 @@ int Tryhard::search(Stack *stack, const libataxx::Position &pos, int alpha, int 
         }
     }
 
-    const auto static_eval = eval(pos);
+    const auto static_eval = eval(pos, weights_);
 
     assert(depth > 0);
 

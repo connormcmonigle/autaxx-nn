@@ -8,6 +8,7 @@
 #include "../search.hpp"
 #include "../tt.hpp"
 #include "ttentry.hpp"
+#include "nnue_model.hpp"
 
 namespace search {
 
@@ -45,7 +46,8 @@ class Tryhard : public Search {
         bool nullmove;
     };
 
-    Tryhard(const unsigned int mb) : tt_{mb} {
+    Tryhard(const unsigned int mb, const std::string& weights_path) : tt_{mb} {
+        weights_.load(weights_path);
     }
 
     void go(const libataxx::Position pos, const Settings &settings) override {
@@ -63,7 +65,22 @@ class Tryhard : public Search {
         }
     }
 
-    [[nodiscard]] static int eval(const libataxx::Position &pos) noexcept;
+    [[nodiscard]] static int eval(const libataxx::Position &pos, const nnue::weights<float>& weights) noexcept {
+        auto evaluator = nnue::eval<float>{&weights};
+
+        for (const auto& sq : pos.white()) {
+            evaluator.white.insert(sq.index());
+            evaluator.black.insert(7*7 + sq.index());
+        }
+
+        for (const auto& sq : pos.black()) {
+            evaluator.black.insert(sq.index());
+            evaluator.white.insert(7*7 + sq.index());
+        }
+
+        const int score = evaluator.evaluate(static_cast<bool>(pos.turn()));
+        return score;
+    }
 
    private:
     void root(const libataxx::Position pos, const Settings &settings) noexcept;
@@ -72,6 +89,7 @@ class Tryhard : public Search {
 
     Stack stack_[max_depth + 1];
     TT<TTEntry> tt_;
+    nnue::weights<float> weights_{};
 };
 
 }  // namespace tryhard

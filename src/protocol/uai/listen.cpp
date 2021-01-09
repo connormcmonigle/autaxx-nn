@@ -8,6 +8,7 @@
 #include "../../search/mostcaptures/mostcaptures.hpp"
 #include "../../search/random/random.hpp"
 #include "../../search/tryhard/tryhard.hpp"
+
 #include "../protocol.hpp"
 #include "extension/display.hpp"
 #include "extension/perft.hpp"
@@ -26,6 +27,9 @@ namespace UAI {
 // Communicate with the UAI protocol (Universal Ataxx Interface)
 // Based on the UCI protocol (Universal Chess Interface)
 void listen() {
+
+    const auto weights = nnue::weights<float>{}.load("/home/connor/ataxx-training/train/model/save.bin");
+
     std::cout << "id name Autaxx" << std::endl;
     std::cout << "id author kz04px" << std::endl;
 
@@ -72,7 +76,7 @@ void listen() {
     } else if (Options::combos["search"].get() == "mostcaptures") {
         search_main = std::unique_ptr<Search>(new mostcaptures::MostCaptures());
     } else if (Options::combos["search"].get() == "tryhard") {
-        search_main = std::unique_ptr<Search>(new tryhard::Tryhard(Options::spins["hash"].get()));
+        search_main = std::unique_ptr<Search>(new tryhard::Tryhard(Options::spins["hash"].get(), "/home/connor/ataxx-training/train/model/save.bin"));
     } else if (Options::combos["search"].get() == "mcts") {
         search_main = std::unique_ptr<Search>(new mcts::MCTS());
     } else if (Options::combos["search"].get() == "minimax") {
@@ -112,6 +116,9 @@ void listen() {
             go(pos, stream);
         } else if (word == "stop") {
             stop();
+        }else if (word == "eval") {
+            const auto e = search::tryhard::Tryhard::eval(pos, weights);
+            std::cout << "info score cp " << e << "\n";
         } else if (word == "print") {
             Extension::display(pos);
         } else if (word == "display") {

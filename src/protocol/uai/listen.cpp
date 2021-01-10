@@ -26,8 +26,8 @@ namespace UAI {
 // Communicate with the UAI protocol (Universal Ataxx Interface)
 // Based on the UCI protocol (Universal Chess Interface)
 void listen() {
-    std::cout << "id name Autaxx" << std::endl;
-    std::cout << "id author kz04px" << std::endl;
+    std::cout << "id name AutaxxNNUE" << std::endl;
+    std::cout << "id author kz04px connormcmonigle" << std::endl;
 
     // Create options
     Options::checks["debug"] = Options::Check(false);

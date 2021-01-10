@@ -27,15 +27,13 @@ namespace UAI {
 // Communicate with the UAI protocol (Universal Ataxx Interface)
 // Based on the UCI protocol (Universal Chess Interface)
 void listen() {
-
-    const auto weights = nnue::weights<float>{}.load("/home/connor/ataxx-training/train/model/save.bin");
-
     std::cout << "id name Autaxx" << std::endl;
     std::cout << "id author kz04px" << std::endl;
 
     // Create options
     Options::checks["debug"] = Options::Check(false);
     Options::spins["hash"] = Options::Spin(1, 2048, 128);
+    Options::strings["nnue-path"] = Options::String("./save.bin");
     Options::combos["search"] = Options::Combo("tryhard",
                                                {
                                                    "tryhard",
@@ -70,13 +68,17 @@ void listen() {
         }
     }
 
+    const auto weights =
+        nnue::weights<float>{}.load(Options::strings["nnue-path"].get());
+
     // Set search type
     if (Options::combos["search"].get() == "random") {
         search_main = std::unique_ptr<Search>(new random::Random());
     } else if (Options::combos["search"].get() == "mostcaptures") {
         search_main = std::unique_ptr<Search>(new mostcaptures::MostCaptures());
     } else if (Options::combos["search"].get() == "tryhard") {
-        search_main = std::unique_ptr<Search>(new tryhard::Tryhard(Options::spins["hash"].get(), "/home/connor/ataxx-training/train/model/save.bin"));
+        search_main = std::unique_ptr<Search>(new tryhard::Tryhard(
+            Options::spins["hash"].get(), Options::strings["nnue-path"].get()));
     } else if (Options::combos["search"].get() == "mcts") {
         search_main = std::unique_ptr<Search>(new mcts::MCTS());
     } else if (Options::combos["search"].get() == "minimax") {

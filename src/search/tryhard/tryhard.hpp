@@ -7,8 +7,8 @@
 #include "../pv.hpp"
 #include "../search.hpp"
 #include "../tt.hpp"
-#include "ttentry.hpp"
 #include "nnue_model.hpp"
+#include "ttentry.hpp"
 
 namespace search {
 
@@ -46,7 +46,7 @@ class Tryhard : public Search {
         bool nullmove;
     };
 
-    Tryhard(const unsigned int mb, const std::string& weights_path) : tt_{mb} {
+    Tryhard(const unsigned int mb, const std::string &weights_path) : tt_{mb} {
         weights_.load(weights_path);
     }
 
@@ -65,17 +65,19 @@ class Tryhard : public Search {
         }
     }
 
-    [[nodiscard]] static int eval(const libataxx::Position &pos, const nnue::weights<float>& weights) noexcept {
+    [[nodiscard]] static int eval(
+        const libataxx::Position &pos,
+        const nnue::weights<float> &weights) noexcept {
         auto evaluator = nnue::eval<float>{&weights};
 
-        for (const auto& sq : pos.white()) {
+        for (const auto &sq : pos.white()) {
             evaluator.white.insert(sq.index());
-            evaluator.black.insert(7*7 + sq.index());
+            evaluator.black.insert(7 * 7 + sq.index());
         }
 
-        for (const auto& sq : pos.black()) {
+        for (const auto &sq : pos.black()) {
             evaluator.black.insert(sq.index());
-            evaluator.white.insert(7*7 + sq.index());
+            evaluator.white.insert(7 * 7 + sq.index());
         }
 
         const int score = evaluator.evaluate(static_cast<bool>(pos.turn()));
@@ -85,7 +87,11 @@ class Tryhard : public Search {
    private:
     void root(const libataxx::Position pos, const Settings &settings) noexcept;
 
-    [[nodiscard]] int search(Stack *stack, const libataxx::Position &pos, int alpha, int beta, int depth);
+    [[nodiscard]] int search(Stack *stack,
+                             const libataxx::Position &pos,
+                             int alpha,
+                             int beta,
+                             int depth);
 
     Stack stack_[max_depth + 1];
     TT<TTEntry> tt_;

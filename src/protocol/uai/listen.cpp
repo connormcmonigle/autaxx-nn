@@ -8,7 +8,6 @@
 #include "../../search/mostcaptures/mostcaptures.hpp"
 #include "../../search/random/random.hpp"
 #include "../../search/tryhard/tryhard.hpp"
-
 #include "../protocol.hpp"
 #include "extension/display.hpp"
 #include "extension/perft.hpp"
@@ -118,7 +117,7 @@ void listen() {
             go(pos, stream);
         } else if (word == "stop") {
             stop();
-        }else if (word == "eval") {
+        } else if (word == "eval") {
             const auto e = search::tryhard::Tryhard::eval(pos, weights);
             std::cout << "info score cp " << e << "\n";
         } else if (word == "print") {

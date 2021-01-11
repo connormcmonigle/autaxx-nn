@@ -22,6 +22,7 @@ void Tryhard::root(const libataxx::Position pos, const Settings &settings) noexc
         stack_[i].killer = libataxx::Move::nomove();
         stack_[i].nullmove = true;
     }
+    init_pos(pos);
 
     PV pv;
     const auto start_time = steady_clock::now();

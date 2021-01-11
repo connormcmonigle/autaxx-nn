@@ -46,8 +46,8 @@ class Tryhard : public Search {
         bool nullmove;
     };
 
-    Tryhard(const unsigned int mb, const std::string &weights_path) : tt_{mb} {
-        weights_.load(weights_path);
+    Tryhard(const unsigned int mb, const nnue::weights<float> &weights)
+        : tt_{mb}, evaluator_{&weights}, turn_{false} {
     }
 
     void go(const libataxx::Position pos, const Settings &settings) override {
@@ -63,6 +63,121 @@ class Tryhard : public Search {
             stack_[i].killer = libataxx::Move::nomove();
             stack_[i].nullmove = true;
         }
+    }
+
+    void init_pos(const libataxx::Position &pos) noexcept {
+        evaluator_.white.clear();
+        evaluator_.black.clear();
+
+        for (const auto &sq : pos.white()) {
+            evaluator_.white.insert(sq.index());
+            evaluator_.black.insert(7 * 7 + sq.index());
+        }
+
+        for (const auto &sq : pos.black()) {
+            evaluator_.black.insert(sq.index());
+            evaluator_.white.insert(7 * 7 + sq.index());
+        }
+
+        turn_ = static_cast<bool>(pos.turn());
+    }
+
+    void update(const libataxx::Position &pos, const libataxx::Move &move) {
+        turn_ = !turn_;
+
+        // Handle nullmove
+        if (move == libataxx::Move::nullmove()) {
+            return;
+        }
+
+        const auto to_bb = libataxx::Bitboard{move.to()};
+        const auto from_bb = libataxx::Bitboard{move.from()};
+        const auto them_unset = to_bb.singles() & pos.them();
+        const auto us_set = them_unset | to_bb;
+        const auto us_unset = from_bb & (~to_bb);
+
+        if (pos.turn() == libataxx::Side::White) {
+            for (const auto sq : us_set) {
+                evaluator_.white.insert(sq.index());
+                evaluator_.black.insert(7 * 7 + sq.index());
+            }
+
+            for (const auto sq : us_unset) {
+                evaluator_.white.erase(sq.index());
+                evaluator_.black.erase(7 * 7 + sq.index());
+            }
+
+            for (const auto sq : them_unset) {
+                evaluator_.black.erase(sq.index());
+                evaluator_.white.erase(7 * 7 + sq.index());
+            }
+        } else {
+            for (const auto sq : us_set) {
+                evaluator_.black.insert(sq.index());
+                evaluator_.white.insert(7 * 7 + sq.index());
+            }
+
+            for (const auto sq : us_unset) {
+                evaluator_.black.erase(sq.index());
+                evaluator_.white.erase(7 * 7 + sq.index());
+            }
+
+            for (const auto sq : them_unset) {
+                evaluator_.white.erase(sq.index());
+                evaluator_.black.erase(7 * 7 + sq.index());
+            }
+        }
+    }
+
+    void downdate(const libataxx::Position &pos, const libataxx::Move &move) {
+        turn_ = !turn_;
+
+        // Handle nullmove
+        if (move == libataxx::Move::nullmove()) {
+            return;
+        }
+
+        const auto to_bb = libataxx::Bitboard{move.to()};
+        const auto from_bb = libataxx::Bitboard{move.from()};
+        const auto them_unset = to_bb.singles() & pos.them();
+        const auto us_set = them_unset | to_bb;
+        const auto us_unset = from_bb & (~to_bb);
+
+        if (pos.turn() == libataxx::Side::White) {
+            for (const auto sq : us_set) {
+                evaluator_.white.erase(sq.index());
+                evaluator_.black.erase(7 * 7 + sq.index());
+            }
+
+            for (const auto sq : us_unset) {
+                evaluator_.white.insert(sq.index());
+                evaluator_.black.insert(7 * 7 + sq.index());
+            }
+
+            for (const auto sq : them_unset) {
+                evaluator_.black.insert(sq.index());
+                evaluator_.white.insert(7 * 7 + sq.index());
+            }
+        } else {
+            for (const auto sq : us_set) {
+                evaluator_.black.erase(sq.index());
+                evaluator_.white.erase(7 * 7 + sq.index());
+            }
+
+            for (const auto sq : us_unset) {
+                evaluator_.black.insert(sq.index());
+                evaluator_.white.insert(7 * 7 + sq.index());
+            }
+
+            for (const auto sq : them_unset) {
+                evaluator_.white.insert(sq.index());
+                evaluator_.black.insert(7 * 7 + sq.index());
+            }
+        }
+    }
+
+    [[nodiscard]] int eval() noexcept {
+        return evaluator_.evaluate(turn_);
     }
 
     [[nodiscard]] static int eval(
@@ -84,6 +199,9 @@ class Tryhard : public Search {
         return score;
     }
 
+    nnue::eval<float> evaluator_;
+    bool turn_;
+
    private:
     void root(const libataxx::Position pos, const Settings &settings) noexcept;
 
@@ -95,7 +213,6 @@ class Tryhard : public Search {
 
     Stack stack_[max_depth + 1];
     TT<TTEntry> tt_;
-    nnue::weights<float> weights_{};
 };
 
 }  // namespace tryhard

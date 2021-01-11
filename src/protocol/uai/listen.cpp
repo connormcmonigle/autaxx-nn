@@ -76,8 +76,8 @@ void listen() {
     } else if (Options::combos["search"].get() == "mostcaptures") {
         search_main = std::unique_ptr<Search>(new mostcaptures::MostCaptures());
     } else if (Options::combos["search"].get() == "tryhard") {
-        search_main = std::unique_ptr<Search>(new tryhard::Tryhard(
-            Options::spins["hash"].get(), Options::strings["nnue-path"].get()));
+        search_main = std::unique_ptr<Search>(
+            new tryhard::Tryhard(Options::spins["hash"].get(), weights));
     } else if (Options::combos["search"].get() == "mcts") {
         search_main = std::unique_ptr<Search>(new mcts::MCTS());
     } else if (Options::combos["search"].get() == "minimax") {

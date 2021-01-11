@@ -54,7 +54,7 @@ int Tryhard::search(Stack *stack, const libataxx::Position &pos, int alpha, int 
 
     // Make sure we stop searching
     if (depth <= 0 || stack->ply >= max_depth) {
-        return eval(pos, weights_);
+        return eval();
     }
 
     const bool root = stack->ply == 0;
@@ -97,18 +97,26 @@ int Tryhard::search(Stack *stack, const libataxx::Position &pos, int alpha, int 
         }
     }
 
-    const auto static_eval = eval(pos, weights_);
+    const auto static_eval = eval();
 
     assert(depth > 0);
+
+    // Create backup evaluator
+    auto evaluator = evaluator_;
 
     // Nullmove pruning
     if (!root && stack->nullmove && depth > 2 && phase(pos) < 0.9) {
         auto npos = pos;
         npos.makemove(libataxx::Move::nullmove());
+        update(pos, libataxx::Move::nullmove());
 
         (stack + 1)->nullmove = false;
         const int score = -search(stack + 1, npos, -beta, -beta + 1, depth - 3);
         (stack + 1)->nullmove = true;
+
+        // Restore backup evaluator
+        evaluator_ = evaluator;
+        turn_ = !turn_;
 
         if (score >= beta) {
             return score;
@@ -136,6 +144,7 @@ int Tryhard::search(Stack *stack, const libataxx::Position &pos, int alpha, int 
 
         auto npos = pos;
         npos.makemove(move);
+        update(pos, move);
 
         int score = 0;
         if (i == 0) {
@@ -147,6 +156,10 @@ int Tryhard::search(Stack *stack, const libataxx::Position &pos, int alpha, int 
                 score = -search(stack + 1, npos, -beta, -alpha, depth - 1);
             }
         }
+
+        // Restore backup evaluator
+        evaluator_ = evaluator;
+        turn_ = !turn_;
 
         if (score > best_score) {
             best_score = score;

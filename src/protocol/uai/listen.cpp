@@ -67,8 +67,7 @@ void listen() {
         }
     }
 
-    const auto weights =
-        nnue::weights<float>{}.load(Options::strings["nnue-path"].get());
+    const auto weights = nnue::weights<float>{}.load(Options::strings["nnue-path"].get());
 
     // Set search type
     if (Options::combos["search"].get() == "random") {
@@ -76,8 +75,7 @@ void listen() {
     } else if (Options::combos["search"].get() == "mostcaptures") {
         search_main = std::unique_ptr<Search>(new mostcaptures::MostCaptures());
     } else if (Options::combos["search"].get() == "tryhard") {
-        search_main = std::unique_ptr<Search>(
-            new tryhard::Tryhard(Options::spins["hash"].get(), weights));
+        search_main = std::unique_ptr<Search>(new tryhard::Tryhard(Options::spins["hash"].get(), weights));
     } else if (Options::combos["search"].get() == "mcts") {
         search_main = std::unique_ptr<Search>(new mcts::MCTS());
     } else if (Options::combos["search"].get() == "minimax") {
@@ -85,8 +83,7 @@ void listen() {
     } else if (Options::combos["search"].get() == "alphabeta") {
         search_main = std::unique_ptr<Search>(new alphabeta::Alphabeta());
     } else if (Options::combos["search"].get() == "leastcaptures") {
-        search_main =
-            std::unique_ptr<Search>(new leastcaptures::LeastCaptures());
+        search_main = std::unique_ptr<Search>(new leastcaptures::LeastCaptures());
     }
 
     libataxx::Position pos;
@@ -128,8 +125,7 @@ void listen() {
             break;
         } else {
             if (Options::checks["debug"].get()) {
-                std::cout << "info unknown UAI command \"" << word << "\""
-                          << std::endl;
+                std::cout << "info unknown UAI command \"" << word << "\"" << std::endl;
             }
         }
     }

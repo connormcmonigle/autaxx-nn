@@ -107,8 +107,7 @@ std::ostream& operator<<(std::ostream& ostr, const stack_vector<T, dim>& vec) {
 }
 
 template <typename T, size_t dim0, size_t dim1>
-constexpr stack_vector<T, dim0 + dim1> splice(const stack_vector<T, dim0>& a,
-                                              const stack_vector<T, dim1>& b) {
+constexpr stack_vector<T, dim0 + dim1> splice(const stack_vector<T, dim0>& a, const stack_vector<T, dim1>& b) {
     auto c = stack_vector<T, dim0 + dim1>::zeros();
 #pragma omp simd
     for (size_t i = 0; i < dim0; ++i) {
@@ -132,8 +131,7 @@ struct stack_affine {
         return W_numel + b_numel;
     }
 
-    constexpr stack_vector<T, dim1> forward(
-        const stack_vector<T, dim0>& x) const {
+    constexpr stack_vector<T, dim1> forward(const stack_vector<T, dim0>& x) const {
         auto result = stack_vector<T, dim1>::from(b);
 #pragma omp simd
         for (size_t i = 0; i < dim0; ++i) {
@@ -142,8 +140,7 @@ struct stack_affine {
         return result;
     }
 
-    constexpr stack_vector<T, dim1> relu_forward(
-        const stack_vector<T, dim0>& x) const {
+    constexpr stack_vector<T, dim1> relu_forward(const stack_vector<T, dim0>& x) const {
         auto result = stack_vector<T, dim1>::from(b);
         for (size_t i = 0; i < dim0; ++i) {
             if (x.data[i] > T{0}) {
@@ -186,8 +183,7 @@ struct big_affine {
         return *this;
     }
 
-    big_affine<T, dim0, dim1>& operator=(
-        const big_affine<T, dim0, dim1>& other) {
+    big_affine<T, dim0, dim1>& operator=(const big_affine<T, dim0, dim1>& other) {
 #pragma omp simd
         for (size_t i = 0; i < W_numel; ++i) {
             W[i] = other.W[i];

@@ -24,8 +24,8 @@ struct weights {
     }
 
     size_t num_parameters() const {
-        return w.num_parameters() + b.num_parameters() + fc0.num_parameters() +
-               fc1.num_parameters() + fc2.num_parameters();
+        return w.num_parameters() + b.num_parameters() + fc0.num_parameters() + fc1.num_parameters() +
+               fc2.num_parameters();
     }
 
     weights<T>& load(weights_streamer<T>& ws) {
@@ -65,8 +65,7 @@ struct feature_transformer {
         weights_->erase_idx(idx, active_);
     }
 
-    feature_transformer(const big_affine<T, half_ka_numel, base_dim>* src)
-        : weights_{src} {
+    feature_transformer(const big_affine<T, half_ka_numel, base_dim>* src) : weights_{src} {
         clear();
     }
 };
@@ -80,8 +79,7 @@ struct eval {
     constexpr T propagate(const bool pov) const {
         const auto w_x = white.active();
         const auto b_x = black.active();
-        const auto x0 = pov ? splice(w_x, b_x).apply_(relu<T>)
-                            : splice(b_x, w_x).apply_(relu<T>);
+        const auto x0 = pov ? splice(w_x, b_x).apply_(relu<T>) : splice(b_x, w_x).apply_(relu<T>);
         const auto x1 = (weights_->fc0).forward(x0).apply_(relu<T>);
         const auto x2 = splice(x1, (weights_->fc1).forward(x1).apply_(relu<T>));
         const T val = (weights_->fc2).forward(x2).item();
@@ -93,8 +91,7 @@ struct eval {
         return static_cast<int>(value);
     }
 
-    eval(const weights<T>* src)
-        : weights_{src}, white{&(src->w)}, black{&(src->b)} {
+    eval(const weights<T>* src) : weights_{src}, white{&(src->w)}, black{&(src->b)} {
     }
 };
 

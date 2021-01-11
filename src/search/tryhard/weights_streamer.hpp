@@ -17,8 +17,7 @@ struct weights_streamer {
     std::fstream file;
 
     weights_streamer<T>& stream(T* dst, const size_t request) {
-        constexpr size_t signature_bytes =
-            std::min(sizeof(signature_type), sizeof(T));
+        constexpr size_t signature_bytes = std::min(sizeof(signature_type), sizeof(T));
         std::array<char, sizeof(T)> single_element{};
         for (size_t i(0); i < request; ++i) {
             file.read(single_element.data(), single_element.size());
@@ -35,8 +34,7 @@ struct weights_streamer {
         return signature_;
     }
 
-    weights_streamer(const std::string& name)
-        : file(name, std::ios_base::in | std::ios_base::binary) {
+    weights_streamer(const std::string& name) : file(name, std::ios_base::in | std::ios_base::binary) {
     }
 };
 

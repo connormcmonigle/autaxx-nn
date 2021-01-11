@@ -46,8 +46,7 @@ class Tryhard : public Search {
         bool nullmove;
     };
 
-    Tryhard(const unsigned int mb, const nnue::weights<float> &weights)
-        : tt_{mb}, evaluator_{&weights}, turn_{false} {
+    Tryhard(const unsigned int mb, const nnue::weights<float> &weights) : tt_{mb}, evaluator_{&weights}, turn_{false} {
     }
 
     void go(const libataxx::Position pos, const Settings &settings) override {
@@ -180,9 +179,7 @@ class Tryhard : public Search {
         return evaluator_.evaluate(turn_);
     }
 
-    [[nodiscard]] static int eval(
-        const libataxx::Position &pos,
-        const nnue::weights<float> &weights) noexcept {
+    [[nodiscard]] static int eval(const libataxx::Position &pos, const nnue::weights<float> &weights) noexcept {
         auto evaluator = nnue::eval<float>{&weights};
 
         for (const auto &sq : pos.white()) {
@@ -205,11 +202,7 @@ class Tryhard : public Search {
    private:
     void root(const libataxx::Position pos, const Settings &settings) noexcept;
 
-    [[nodiscard]] int search(Stack *stack,
-                             const libataxx::Position &pos,
-                             int alpha,
-                             int beta,
-                             int depth);
+    [[nodiscard]] int search(Stack *stack, const libataxx::Position &pos, int alpha, int beta, int depth);
 
     Stack stack_[max_depth + 1];
     TT<TTEntry> tt_;

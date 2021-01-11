@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <iostream>
 #include <string>
 #include "nnue_util.hpp"
 #include "weights_streamer.hpp"
@@ -90,7 +89,6 @@ struct eval {
         const auto x2 = splice(x1, (weights_->fc1).forward(x1).apply_(relu<T>));
         const auto x3 = splice(x2, (weights_->fc2).forward(x2).apply_(relu<T>));
         const T val = (weights_->fc3).forward(x3).item();
-        // std::cout << val << std::endl;
         return val;
     }
 

@@ -196,6 +196,8 @@ class Tryhard : public Search {
         return score;
     }
 
+    [[nodiscard]] static int classical(const libataxx::Position &pos) noexcept;
+
     nnue::eval<float> evaluator_;
     bool turn_;
 

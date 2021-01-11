@@ -37,6 +37,7 @@ add_executable(
     src/protocol/uai/extension/perft.cpp
     src/protocol/uai/extension/split.cpp
     src/search/search.cpp
+    src/search/tryhard/classical.cpp
     src/search/tryhard/search.cpp
     src/search/tryhard/root.cpp
     src/search/mcts/eval.cpp

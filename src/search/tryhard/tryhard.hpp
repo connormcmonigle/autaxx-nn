@@ -1,6 +1,9 @@
 #ifndef SEARCH_TRYHARD_HPP
 #define SEARCH_TRYHARD_HPP
 
+#include <array>
+#include <algorithm>
+
 #include <libataxx/move.hpp>
 #include <libataxx/position.hpp>
 #include "../../utils.hpp"
@@ -206,8 +209,30 @@ class Tryhard : public Search {
 
     [[nodiscard]] int search(Stack *stack, const libataxx::Position &pos, int alpha, int beta, int depth);
 
+    
+    void update_history(const libataxx::Move& best_move, const libataxx::Move* tried, const size_t& n_tried, const int& depth){
+        constexpr int history_max = 400;
+        constexpr int history_multiplier = 32;
+        constexpr int history_divisor = 512;
+
+        auto update_once = [&, this](const libataxx::Move& mv, const int& gain){
+            const size_t idx = mv.from().index() * 7 * 7 + mv.to().index();
+            from_to_history_[idx] += (gain * history_multiplier) - (from_to_history_[idx] * std::abs(gain) / history_divisor);
+        };
+
+        const int gain = std::min(history_max, depth * depth);
+
+        for(size_t i(0); i < n_tried; ++i){ update_once(tried[i], -gain); }
+        update_once(best_move, gain);
+    }
+
+    int get_history(const libataxx::Move& mv) const {
+        return from_to_history_[mv.from().index() * 7 * 7 + mv.to().index()];
+    }
+
     Stack stack_[max_depth + 1];
     TT<TTEntry> tt_;
+    std::array<int, 7*7*7*7> from_to_history_{};
 };
 
 }  // namespace tryhard

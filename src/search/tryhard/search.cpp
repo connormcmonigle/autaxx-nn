@@ -129,6 +129,9 @@ int Tryhard::search(Stack *stack, const libataxx::Position &pos, int alpha, int 
         return alpha;
     }
 
+    size_t n_tried{0};
+    libataxx::Move tried[libataxx::max_moves];
+
     int best_score = std::numeric_limits<int>::min();
     libataxx::Move best_move;
 
@@ -146,11 +149,13 @@ int Tryhard::search(Stack *stack, const libataxx::Position &pos, int alpha, int 
         npos.makemove(move);
         update(pos, move);
 
+        const int history_score = get_history(move);
+
         int score = 0;
         if (i == 0) {
             score = -search(stack + 1, npos, -beta, -alpha, depth - 1);
         } else {
-            const int r = reduction(npos, i, depth, pvnode);
+            const int r = reduction(npos, i, depth, pvnode, history_score);
             score = -search(stack + 1, npos, -alpha - 1, -alpha, depth - 1 - r);
             if (score > alpha) {
                 score = -search(stack + 1, npos, -beta, -alpha, depth - 1);
@@ -160,6 +165,10 @@ int Tryhard::search(Stack *stack, const libataxx::Position &pos, int alpha, int 
         // Restore backup evaluator
         evaluator_ = evaluator;
         turn_ = !turn_;
+
+        if(score < alpha){
+            tried[n_tried++] = move;
+        }
 
         if (score > best_score) {
             best_score = score;
@@ -199,6 +208,9 @@ int Tryhard::search(Stack *stack, const libataxx::Position &pos, int alpha, int 
     if (best_score <= alpha_orig) {
         nentry.flag = TTEntry::Flag::Upper;
     } else if (best_score >= beta) {
+
+        update_history(best_move, tried, n_tried, depth);
+
         nentry.flag = TTEntry::Flag::Lower;
     }
     tt_.add(pos.hash(), nentry);
